@@ -1,66 +1,91 @@
-# Modern E-ticaret API'si
+# E-Ticaret API
 
-Bu proje, NestJS kullanılarak geliştirilmiş modern bir e-ticaret API'sidir.
+Modern bir e-ticaret platformu için NestJS tabanlı REST API.
 
 ## Özellikler
 
-- 🛍️ Ürün yönetimi
-- 👥 Kullanıcı yönetimi ve kimlik doğrulama
-- 🛒 Sepet ve sipariş yönetimi
-- 💳 Ödeme sistemi entegrasyonu
-- 📦 Stok yönetimi
-- 🔔 Gerçek zamanlı bildirimler
-- 📊 Raporlama ve analitik
-- 🔒 Gelişmiş güvenlik önlemleri
+- 🔐 JWT tabanlı kimlik doğrulama ve yetkilendirme
+- 💳 Stripe entegrasyonu ile güvenli ödeme işlemleri
+- 📦 Ürün yönetimi ve stok takibi
+- 🛒 Alışveriş sepeti işlemleri
+- 📝 Sipariş yönetimi
+- 👥 Kullanıcı yönetimi ve rol bazlı yetkilendirme
+- 📨 Bildirim sistemi
+- 📚 Swagger API dokümantasyonu
 
 ## Teknolojiler
 
 - NestJS
 - MongoDB & Mongoose
-- JWT Authentication
-- WebSocket
-- Stripe Payment
-- AWS Services
+- TypeScript
+- Jest (Test)
+- Stripe API
+- Swagger
+- Helmet (Güvenlik)
 
 ## Kurulum
 
+1. Gereksinimleri yükleyin:
 ```bash
-# Bağımlılıkları yükleyin
 npm install
-
-# Geliştirme modunda çalıştırın
-npm run start:dev
-
-# Production build alın
-npm run build
-
-# Production modunda çalıştırın
-npm run start:prod
 ```
 
-## Ortam Değişkenleri
+2. Çevre değişkenlerini ayarlayın:
+```bash
+cp .env.example .env
+```
 
-Projeyi çalıştırmadan önce `.env` dosyasını oluşturun ve aşağıdaki değişkenleri ayarlayın:
+Aşağıdaki değişkenleri `.env` dosyasında yapılandırın:
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
 
-```env
-MONGODB_URI=mongodb://localhost:27017/ecommerce
-JWT_SECRET=your-secret-key
-STRIPE_SECRET_KEY=your-stripe-secret-key
+3. Uygulamayı başlatın:
+```bash
+# Geliştirme
+npm run start:dev
+
+# Prodüksiyon
+npm run start:prod
 ```
 
 ## API Dokümantasyonu
 
-API dokümantasyonuna `/api/docs` endpoint'inden erişebilirsiniz (Swagger UI).
+Swagger dokümantasyonuna `/api/docs` endpoint'inden erişebilirsiniz.
 
 ## Test
 
 ```bash
-# Unit testleri çalıştırın
-npm run test
+# Unit testleri çalıştır
+npm test
 
-# E2E testleri çalıştırın
+# E2E testleri çalıştır
 npm run test:e2e
 
-# Test coverage raporu alın
+# Test coverage raporu
 npm run test:cov
-``` 
+```
+
+## Güvenlik
+
+- JWT tabanlı kimlik doğrulama
+- Helmet ile güvenlik başlıkları
+- CORS koruması
+- Input validasyonu
+- Rate limiting
+- Rol bazlı yetkilendirme
+
+## Modüller
+
+- Auth: Kimlik doğrulama ve yetkilendirme
+- Users: Kullanıcı yönetimi
+- Products: Ürün yönetimi
+- Cart: Alışveriş sepeti işlemleri
+- Orders: Sipariş yönetimi
+- Payment: Ödeme işlemleri
+- Notifications: Bildirim sistemi
+
+## Lisans
+
+MIT 
