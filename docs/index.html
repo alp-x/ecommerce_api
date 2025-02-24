@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Ticaret API Dokümantasyonu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --text-color: #1f2937;
+            --bg-color: #ffffff;
+            --code-bg: #1e293b;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: #f8fafc;
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 280px;
+            max-width: 1200px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: #e2e8f0;
+        }
+
+        h1, h2, h3 {
+            color: var(--text-color);
+            margin: 1.5rem 0 1rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            background-color: #fef3c7;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            color: #e5e7eb;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+
+        .endpoint {
+            display: flex;
+            align-items: center;
+            background-color: var(--code-bg);
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+
+        .method {
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        .method.get { color: #22c55e; }
+        .method.post { color: #3b82f6; }
+        .method.put { color: #f59e0b; }
+        .method.delete { color: #ef4444; }
+
+        .path {
+            color: #e5e7eb;
+            font-family: 'Fira Code', monospace;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+        }
+
+        .env-table code {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                📦 E-Ticaret API
+            </div>
+            <nav>
+                <div class="nav-item">
+                    <a href="#baslangic" class="nav-link">🚀 Başlangıç</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#kurulum" class="nav-link">⚙️ Kurulum</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#moduller" class="nav-link">🔧 Modüller</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#auth" class="nav-link">🔐 Kimlik Doğrulama</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#products" class="nav-link">📦 Ürünler</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#orders" class="nav-link">🛍️ Siparişler</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#notifications" class="nav-link">🔔 Bildirimler</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#payment" class="nav-link">💳 Ödeme</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <h1>E-Ticaret API Dokümantasyonu</h1>
+            
+            <section id="baslangic">
+                <h2>🚀 Başlangıç</h2>
+                <div class="card">
+                    <p>Bu API, modern bir e-ticaret platformu için geliştirilmiş kapsamlı bir backend çözümüdür. NestJS framework'ü üzerine inşa edilmiş olup, MongoDB veritabanını kullanmaktadır.</p>
+                    
+                    <h3>Özellikler</h3>
+                    <ul>
+                        <li>🔐 JWT tabanlı kimlik doğrulama</li>
+                        <li>📦 Ürün yönetimi</li>
+                        <li>🛍️ Sipariş işlemleri</li>
+                        <li>💳 Stripe entegrasyonu ile ödeme işlemleri</li>
+                        <li>🔔 WebSocket tabanlı gerçek zamanlı bildirimler</li>
+                        <li>📊 Stok yönetimi</li>
+                        <li>👥 Kullanıcı yönetimi</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="kurulum">
+                <h2>⚙️ Kurulum</h2>
+                
+                <h3>Gereksinimler</h3>
+                <div class="card">
+                    <ul>
+                        <li>Node.js (v16 veya üzeri)</li>
+                        <li>MongoDB (v4.4 veya üzeri)</li>
+                        <li>npm veya yarn</li>
+                    </ul>
+                </div>
+
+                <h3>Ortam Değişkenleri</h3>
+                <div class="card">
+                    <p>Projenin kök dizininde <code>.env</code> dosyası oluşturun ve aşağıdaki değişkenleri tanımlayın:</p>
+                    <table class="env-table">
+                        <tr>
+                            <th>Değişken</th>
+                            <th>Açıklama</th>
+                            <th>Örnek Değer</th>
+                        </tr>
+                        <tr>
+                            <td><code>MONGODB_URI</code></td>
+                            <td>MongoDB bağlantı adresi</td>
+                            <td><code>mongodb://localhost:27017/ecommerce</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>JWT_SECRET</code></td>
+                            <td>JWT token şifreleme anahtarı</td>
+                            <td><code>your-secret-key</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>JWT_EXPIRATION</code></td>
+                            <td>Token geçerlilik süresi</td>
+                            <td><code>24h</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>STRIPE_SECRET_KEY</code></td>
+                            <td>Stripe API anahtarı</td>
+                            <td><code>sk_test_...</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>STRIPE_WEBHOOK_SECRET</code></td>
+                            <td>Stripe Webhook gizli anahtarı</td>
+                            <td><code>whsec_...</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Kurulum Adımları</h3>
+                <div class="card">
+                    <pre><code class="language-bash"># Projeyi klonlayın
+git clone https://github.com/username/ecommerce-api.git
+
+# Bağımlılıkları yükleyin
+npm install
+
+# Geliştirme modunda başlatın
+npm run start:dev
+
+# Veya production modunda başlatın
+npm run start:prod</code></pre>
+                </div>
+            </section>
+
+            <section id="moduller">
+                <h2>🔧 Modüller</h2>
+                
+                <div class="card">
+                    <h3>Auth Module</h3>
+                    <p>Kullanıcı kimlik doğrulama ve yetkilendirme işlemlerini yönetir.</p>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/auth/login</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/auth/register</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Products Module</h3>
+                    <p>Ürün yönetimi ve stok kontrolü işlemlerini yönetir.</p>
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <span class="path">/products</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/products</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Orders Module</h3>
+                    <p>Sipariş işlemlerini yönetir.</p>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/orders</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <span class="path">/orders/:id</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Notifications Module</h3>
+                    <p>WebSocket üzerinden gerçek zamanlı bildirim yönetimi.</p>
+                    <div class="alert">
+                        WebSocket bağlantısı için JWT token gereklidir.
+                    </div>
+                    <pre><code class="language-javascript">// WebSocket bağlantı örneği
+const socket = io('ws://localhost:3000', {
+  extraHeaders: {
+    Authorization: `Bearer ${jwtToken}`
+  }
+});</code></pre>
+                </div>
+
+                <div class="card">
+                    <h3>Payment Module</h3>
+                    <p>Stripe entegrasyonu ile ödeme işlemlerini yönetir.</p>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/payment/process</span>
+                    </div>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/payment/webhook</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="auth">
+                <h2>🔐 Kimlik Doğrulama</h2>
+                <div class="card">
+                    <h3>JWT Kullanımı</h3>
+                    <p>API isteklerinde JWT token'ı Authorization header'ında gönderilmelidir:</p>
+                    <pre><code class="language-javascript">fetch('/api/products', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});</code></pre>
+                </div>
+            </section>
+
+            <section id="websocket">
+                <h2>🔌 WebSocket Bağlantısı</h2>
+                <div class="card">
+                    <p>Bildirimler için WebSocket bağlantısı gereklidir. Bağlantı örneği:</p>
+                    <pre><code class="language-typescript">import { io } from 'socket.io-client';
+
+const socket = io('ws://localhost:3000', {
+  extraHeaders: {
+    Authorization: `Bearer ${jwtToken}`
+  }
+});
+
+socket.on('notification', (data) => {
+  console.log('Yeni bildirim:', data);
+});</code></pre>
+                </div>
+            </section>
+
+            <section id="products">
+                <h2>📦 Ürünler</h2>
+                <div class="card">
+                    <h3>Ürün İşlemleri</h3>
+                    <p>Ürün yönetimi ve stok kontrolü işlemlerini yönetir. Tüm ürün işlemleri için JWT token gereklidir.</p>
+                    
+                    <h4>Endpoints</h4>
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <span class="path">/products</span>
+                        <span class="badge">Tüm ürünleri listele</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Response
+{
+  "data": [
+    {
+      "id": "123",
+      "name": "iPhone 13",
+      "description": "Apple iPhone 13",
+      "price": 999.99,
+      "stock": 50,
+      "category": "electronics",
+      "images": ["url1", "url2"],
+      "createdAt": "2024-02-24T20:00:00Z"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10
+}</code></pre>
+
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <span class="path">/products/:id</span>
+                        <span class="badge">Tek ürün detayı</span>
+                    </div>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/products</span>
+                        <span class="badge">Yeni ürün ekle</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "name": "iPhone 13",
+  "description": "Apple iPhone 13",
+  "price": 999.99,
+  "stock": 50,
+  "category": "electronics",
+  "images": ["url1", "url2"]
+}</code></pre>
+
+                    <div class="endpoint">
+                        <span class="method put">PUT</span>
+                        <span class="path">/products/:id</span>
+                        <span class="badge">Ürün güncelle</span>
+                    </div>
+
+                    <div class="endpoint">
+                        <span class="method delete">DELETE</span>
+                        <span class="path">/products/:id</span>
+                        <span class="badge">Ürün sil</span>
+                    </div>
+
+                    <div class="endpoint">
+                        <span class="method patch">PATCH</span>
+                        <span class="path">/products/:id/stock</span>
+                        <span class="badge">Stok güncelle</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "stock": 45,  // Yeni stok miktarı
+  "operation": "decrease"  // "increase" veya "decrease"
+}</code></pre>
+                </div>
+            </section>
+
+            <section id="orders">
+                <h2>🛍️ Siparişler</h2>
+                <div class="card">
+                    <h3>Sipariş İşlemleri</h3>
+                    <p>Sipariş oluşturma, güncelleme ve takip işlemlerini yönetir. Tüm sipariş işlemleri için JWT token gereklidir.</p>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/orders</span>
+                        <span class="badge">Yeni sipariş oluştur</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "items": [
+    {
+      "productId": "123",
+      "quantity": 2
+    }
+  ],
+  "shippingAddress": {
+    "street": "Atatürk Cad.",
+    "city": "İstanbul",
+    "country": "Türkiye",
+    "zipCode": "34100"
+  },
+  "paymentMethod": "stripe"
+}</code></pre>
+
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <span class="path">/orders</span>
+                        <span class="badge">Siparişleri listele</span>
+                    </div>
+
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <span class="path">/orders/:id</span>
+                        <span class="badge">Sipariş detayı</span>
+                    </div>
+
+                    <div class="endpoint">
+                        <span class="method patch">PATCH</span>
+                        <span class="path">/orders/:id/status</span>
+                        <span class="badge">Sipariş durumu güncelle</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "status": "shipped"  // pending, paid, shipped, delivered, cancelled
+}</code></pre>
+                </div>
+            </section>
+
+            <section id="notifications">
+                <h2>🔔 Bildirimler</h2>
+                <div class="card">
+                    <h3>Gerçek Zamanlı Bildirimler</h3>
+                    <p>WebSocket üzerinden gerçek zamanlı bildirim sistemi. Sipariş durumu değişiklikleri, stok güncellemeleri ve sistem bildirimleri için kullanılır.</p>
+
+                    <h4>Bildirim Türleri</h4>
+                    <ul>
+                        <li>🛍️ Sipariş Durumu Değişiklikleri</li>
+                        <li>📦 Stok Güncellemeleri</li>
+                        <li>💳 Ödeme Bildirimleri</li>
+                        <li>⚠️ Sistem Bildirimleri</li>
+                    </ul>
+
+                    <h4>WebSocket Bağlantısı</h4>
+                    <pre><code class="language-typescript">import { io } from 'socket.io-client';
+
+const socket = io('ws://localhost:3000', {
+  extraHeaders: {
+    Authorization: `Bearer ${jwtToken}`
+  }
+});
+
+// Bildirim dinleme
+socket.on('orderStatus', (data) => {
+  console.log('Sipariş durumu değişti:', data);
+});
+
+socket.on('stockUpdate', (data) => {
+  console.log('Stok güncellendi:', data);
+});
+
+socket.on('paymentStatus', (data) => {
+  console.log('Ödeme durumu:', data);
+});</code></pre>
+                </div>
+            </section>
+
+            <section id="payment">
+                <h2>💳 Ödeme</h2>
+                <div class="card">
+                    <h3>Stripe Ödeme İşlemleri</h3>
+                    <p>Stripe entegrasyonu ile güvenli ödeme işlemleri. Kredi kartı ödemeleri ve ödeme takibi için kullanılır.</p>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/payment/intent</span>
+                        <span class="badge">Ödeme niyeti oluştur</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "amount": 1999.99,
+  "currency": "try",
+  "orderId": "123"
+}
+
+// Örnek Response
+{
+  "clientSecret": "pi_3Mj8Yk..._secret_K2nL9",
+  "paymentIntentId": "pi_3Mj8Yk..."
+}</code></pre>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/payment/confirm</span>
+                        <span class="badge">Ödemeyi onayla</span>
+                    </div>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/payment/webhook</span>
+                        <span class="badge">Stripe Webhook</span>
+                    </div>
+
+                    <h4>Frontend Entegrasyonu</h4>
+                    <pre><code class="language-javascript">// Stripe Elements kullanımı
+const stripe = Stripe('your_publishable_key');
+const elements = stripe.elements();
+
+const card = elements.create('card');
+card.mount('#card-element');
+
+// Ödeme işlemi
+const { paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+  payment_method: {
+    card: card,
+    billing_details: {
+      name: 'Müşteri Adı'
+    }
+  }
+});</code></pre>
+
+                    <div class="alert">
+                        ⚠️ Stripe test modunda çalışırken test kartları kullanın:
+                        <ul>
+                            <li>Başarılı ödeme: 4242 4242 4242 4242</li>
+                            <li>Başarısız ödeme: 4000 0000 0000 0002</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-typescript.min.js"></script>
+</body>
+</html> 
