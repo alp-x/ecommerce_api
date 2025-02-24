@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { OrdersService } from '../orders/orders.service';
 import { ProcessPaymentDto } from './dto/process-payment.dto';
+import { OrderStatus } from '../orders/schemas/order.schema';
 
 @Injectable()
 export class PaymentService {
@@ -12,8 +13,12 @@ export class PaymentService {
     private readonly configService: ConfigService,
     private readonly ordersService: OrdersService,
   ) {
-    this.stripe = new Stripe(configService.get('STRIPE_SECRET_KEY'), {
-      apiVersion: '2023-10-16',
+    const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+    if (!stripeSecretKey) {
+      throw new Error('STRIPE_SECRET_KEY is not defined');
+    }
+    this.stripe = require('stripe')(stripeSecretKey, {
+      apiVersion: '2022-11-15',
     });
   }
 
@@ -35,7 +40,7 @@ export class PaymentService {
 
       if (paymentIntent.status === 'succeeded') {
         await this.ordersService.update(userId, orderId, {
-          status: 'processing',
+          status: OrderStatus.PROCESSING,
         });
 
         return {
@@ -69,10 +74,15 @@ export class PaymentService {
 
   async handleWebhook(signature: string, payload: Buffer) {
     try {
+      const webhookSecret = this.configService.get('STRIPE_WEBHOOK_SECRET');
+      if (!webhookSecret) {
+        throw new Error('STRIPE_WEBHOOK_SECRET is not defined');
+      }
+
       const event = this.stripe.webhooks.constructEvent(
         payload,
         signature,
-        this.configService.get('STRIPE_WEBHOOK_SECRET'),
+        webhookSecret,
       );
 
       switch (event.type) {

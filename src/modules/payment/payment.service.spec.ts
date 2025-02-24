@@ -2,9 +2,21 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PaymentService } from './payment.service';
 import { OrdersService } from '../orders/orders.service';
-import Stripe from 'stripe';
 
-jest.mock('stripe');
+const mockPaymentIntents = {
+  create: jest.fn(),
+};
+
+const mockWebhooks = {
+  constructEvent: jest.fn(),
+};
+
+jest.mock('stripe', () => {
+  return jest.fn().mockImplementation(() => ({
+    paymentIntents: mockPaymentIntents,
+    webhooks: mockWebhooks,
+  }));
+});
 
 describe('PaymentService', () => {
   let service: PaymentService;
@@ -17,7 +29,7 @@ describe('PaymentService', () => {
   };
 
   const mockConfigService = {
-    get: jest.fn(),
+    get: jest.fn().mockReturnValue('mock_key'),
   };
 
   beforeEach(async () => {
@@ -38,6 +50,9 @@ describe('PaymentService', () => {
     service = module.get<PaymentService>(PaymentService);
     ordersService = module.get<OrdersService>(OrdersService);
     configService = module.get<ConfigService>(ConfigService);
+
+    // Reset all mocks
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -56,9 +71,7 @@ describe('PaymentService', () => {
       };
 
       mockOrdersService.findOne.mockResolvedValue(mockOrder);
-      (Stripe.prototype.paymentIntents.create as jest.Mock).mockResolvedValue(
-        mockPaymentIntent,
-      );
+      mockPaymentIntents.create.mockResolvedValue(mockPaymentIntent);
 
       const result = await service.processPayment('user123', 'order123', {
         paymentMethodId: 'pm_123',
@@ -82,9 +95,7 @@ describe('PaymentService', () => {
       };
 
       mockOrdersService.findOne.mockResolvedValue(mockOrder);
-      (Stripe.prototype.paymentIntents.create as jest.Mock).mockResolvedValue(
-        mockPaymentIntent,
-      );
+      mockPaymentIntents.create.mockResolvedValue(mockPaymentIntent);
 
       const result = await service.processPayment('user123', 'order123', {
         paymentMethodId: 'pm_123',
@@ -107,9 +118,7 @@ describe('PaymentService', () => {
       };
 
       mockOrdersService.findOne.mockResolvedValue(mockOrder);
-      (Stripe.prototype.paymentIntents.create as jest.Mock).mockResolvedValue(
-        mockPaymentIntent,
-      );
+      mockPaymentIntents.create.mockResolvedValue(mockPaymentIntent);
 
       const result = await service.createPaymentIntent('user123', 'order123');
 
@@ -128,9 +137,7 @@ describe('PaymentService', () => {
         },
       };
 
-      (Stripe.prototype.webhooks.constructEvent as jest.Mock).mockReturnValue(
-        mockEvent,
-      );
+      mockWebhooks.constructEvent.mockReturnValue(mockEvent);
 
       const result = await service.handleWebhook('signature', Buffer.from(''));
 
@@ -138,11 +145,9 @@ describe('PaymentService', () => {
     });
 
     it('should handle webhook errors', async () => {
-      (Stripe.prototype.webhooks.constructEvent as jest.Mock).mockImplementation(
-        () => {
-          throw new Error('Invalid signature');
-        },
-      );
+      mockWebhooks.constructEvent.mockImplementation(() => {
+        throw new Error('Invalid signature');
+      });
 
       await expect(
         service.handleWebhook('invalid_signature', Buffer.from('')),

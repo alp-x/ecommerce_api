@@ -27,27 +27,44 @@ export class CartService {
       throw new Error('Yetersiz stok');
     }
 
-    let cart = await this.getCart(userId);
+    const cart = await this.getCart(userId);
     const existingItemIndex = cart.items.findIndex(
-      item => item.productId.toString() === addToCartDto.productId,
+      (item) => item.productId === addToCartDto.productId,
     );
 
     if (existingItemIndex > -1) {
-      cart.items[existingItemIndex].quantity += addToCartDto.quantity;
+      // Mevcut ürünün miktarını güncelle
+      return this.cartModel
+        .findOneAndUpdate(
+          { userId, 'items.productId': addToCartDto.productId },
+          {
+            $inc: {
+              'items.$.quantity': addToCartDto.quantity,
+              totalAmount: product.price * addToCartDto.quantity,
+            },
+          },
+          { new: true },
+        )
+        .exec();
     } else {
-      cart.items.push({
-        productId: addToCartDto.productId,
-        quantity: addToCartDto.quantity,
-        price: product.price,
-      });
+      // Yeni ürün ekle
+      return this.cartModel
+        .findOneAndUpdate(
+          { userId },
+          {
+            $push: {
+              items: {
+                productId: addToCartDto.productId,
+                quantity: addToCartDto.quantity,
+                price: product.price,
+              },
+            },
+            $inc: { totalAmount: product.price * addToCartDto.quantity },
+          },
+          { new: true },
+        )
+        .exec();
     }
-
-    cart.totalAmount = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0,
-    );
-
-    return cart.save();
   }
 
   async updateCartItem(
@@ -56,55 +73,63 @@ export class CartService {
     updateCartItemDto: UpdateCartItemDto,
   ): Promise<Cart> {
     const cart = await this.getCart(userId);
-    const itemIndex = cart.items.findIndex(
-      item => item.productId.toString() === productId,
-    );
+    const item = cart.items.find((item) => item.productId === productId);
 
-    if (itemIndex === -1) {
+    if (!item) {
       throw new NotFoundException('Ürün sepette bulunamadı');
     }
 
     if (updateCartItemDto.quantity === 0) {
-      cart.items.splice(itemIndex, 1);
-    } else {
-      const product = await this.productsService.findOne(productId);
-      if (product.stock < updateCartItemDto.quantity) {
-        throw new Error('Yetersiz stok');
-      }
-      cart.items[itemIndex].quantity = updateCartItemDto.quantity;
+      return this.removeFromCart(userId, productId);
     }
 
-    cart.totalAmount = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0,
-    );
+    const product = await this.productsService.findOne(productId);
+    if (product.stock < updateCartItemDto.quantity) {
+      throw new Error('Yetersiz stok');
+    }
 
-    return cart.save();
-  }
+    const priceDifference =
+      (updateCartItemDto.quantity - item.quantity) * item.price;
 
-  async clearCart(userId: string): Promise<void> {
-    await this.cartModel.findOneAndUpdate(
-      { userId },
-      { items: [], totalAmount: 0 },
-    );
+    return this.cartModel
+      .findOneAndUpdate(
+        { userId, 'items.productId': productId },
+        {
+          $set: { 'items.$.quantity': updateCartItemDto.quantity },
+          $inc: { totalAmount: priceDifference },
+        },
+        { new: true },
+      )
+      .exec();
   }
 
   async removeFromCart(userId: string, productId: string): Promise<Cart> {
     const cart = await this.getCart(userId);
-    const itemIndex = cart.items.findIndex(
-      item => item.productId.toString() === productId,
-    );
+    const item = cart.items.find((item) => item.productId === productId);
 
-    if (itemIndex === -1) {
+    if (!item) {
       throw new NotFoundException('Ürün sepette bulunamadı');
     }
 
-    cart.items.splice(itemIndex, 1);
-    cart.totalAmount = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0,
-    );
+    return this.cartModel
+      .findOneAndUpdate(
+        { userId },
+        {
+          $pull: { items: { productId } },
+          $inc: { totalAmount: -(item.price * item.quantity) },
+        },
+        { new: true },
+      )
+      .exec();
+  }
 
-    return cart.save();
+  async clearCart(userId: string): Promise<void> {
+    await this.cartModel
+      .findOneAndUpdate(
+        { userId },
+        { $set: { items: [], totalAmount: 0 } },
+        { new: true },
+      )
+      .exec();
   }
 } 

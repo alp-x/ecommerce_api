@@ -13,8 +13,7 @@ export class ProductsService {
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const createdProduct = new this.productModel(createProductDto);
-    return createdProduct.save();
+    return this.productModel.create(createProductDto);
   }
 
   async findAll(filterProductDto: FilterProductDto): Promise<Product[]> {
@@ -50,35 +49,37 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
-    const existingProduct = await this.productModel
-      .findByIdAndUpdate(id, updateProductDto, { new: true })
+    const product = await this.productModel
+      .findByIdAndUpdate(id, { $set: updateProductDto }, { new: true })
       .exec();
-    
-    if (!existingProduct) {
-      throw new NotFoundException(`Ürün #${id} bulunamadı`);
-    }
-    return existingProduct;
-  }
 
-  async remove(id: string): Promise<void> {
-    const result = await this.productModel.deleteOne({ _id: id }).exec();
-    if (result.deletedCount === 0) {
-      throw new NotFoundException(`Ürün #${id} bulunamadı`);
-    }
-  }
-
-  async updateStock(id: string, quantity: number): Promise<void> {
-    const product = await this.productModel.findById(id).exec();
     if (!product) {
       throw new NotFoundException(`Ürün #${id} bulunamadı`);
     }
 
-    if (product.stock < quantity) {
-      throw new Error('Yetersiz stok');
-    }
+    return product;
+  }
 
-    product.stock -= quantity;
-    await product.save();
+  async remove(id: string): Promise<Product> {
+    const result = await this.productModel.findByIdAndDelete(id).exec();
+    if (!result) {
+      throw new NotFoundException(`Ürün #${id} bulunamadı`);
+    }
+    return result;
+  }
+
+  async updateStock(id: string, quantity: number): Promise<void> {
+    const result = await this.productModel
+      .updateOne(
+        { _id: id },
+        { $inc: { stock: -quantity } },
+        { new: true },
+      )
+      .exec();
+
+    if (result.modifiedCount === 0) {
+      throw new NotFoundException(`Ürün #${id} bulunamadı`);
+    }
   }
 
   async getBySellerId(sellerId: string): Promise<Product[]> {

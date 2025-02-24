@@ -51,7 +51,12 @@ export class CreateProductDto {
   @IsString()
   sellerId: string;
 
-  @ApiProperty({ description: 'SKU kodu' })
+  @ApiProperty({ description: 'Ürün SKU kodu' })
   @IsString()
   sku: string;
+
+  @ApiProperty({ description: 'Ürün görseli URL', required: false })
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
 } 

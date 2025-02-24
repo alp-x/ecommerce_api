@@ -63,48 +63,47 @@ export class OrdersService {
     return this.orderModel.find({ userId }).sort({ createdAt: -1 }).exec();
   }
 
-  async findOne(userId: string, orderId: string): Promise<Order> {
-    const order = await this.orderModel.findOne({ _id: orderId, userId }).exec();
+  async findOne(userId: string, id: string): Promise<Order> {
+    const order = await this.orderModel.findOne({ _id: id, userId }).exec();
     if (!order) {
-      throw new NotFoundException('Sipariş bulunamadı');
+      throw new NotFoundException(`Sipariş #${id} bulunamadı`);
     }
     return order;
   }
 
   async update(
     userId: string,
-    orderId: string,
+    id: string,
     updateOrderDto: UpdateOrderDto,
   ): Promise<Order> {
-    const order = await this.findOne(userId, orderId);
-    
-    if (updateOrderDto.status) {
-      order.status = updateOrderDto.status;
+    const order = await this.orderModel
+      .findOneAndUpdate(
+        { _id: id, userId },
+        { $set: updateOrderDto },
+        { new: true },
+      )
+      .exec();
+
+    if (!order) {
+      throw new NotFoundException(`Sipariş #${id} bulunamadı`);
     }
 
-    if (updateOrderDto.trackingNumber) {
-      order.trackingNumber = updateOrderDto.trackingNumber;
-    }
-
-    return order.save();
+    return order;
   }
 
-  async cancel(userId: string, orderId: string): Promise<Order> {
-    const order = await this.findOne(userId, orderId);
+  async cancel(userId: string, id: string): Promise<Order> {
+    const order = await this.findOne(userId, id);
     
     if (order.status !== OrderStatus.PENDING) {
       throw new Error('Bu sipariş iptal edilemez');
     }
 
-    order.status = OrderStatus.CANCELLED;
-
-    // Stokları geri ekle
-    await Promise.all(
-      order.items.map((item) =>
-        this.productsService.updateStock(item.productId, -item.quantity),
-      ),
-    );
-
-    return order.save();
+    return this.orderModel
+      .findOneAndUpdate(
+        { _id: id, userId },
+        { $set: { status: OrderStatus.CANCELLED } },
+        { new: true },
+      )
+      .exec();
   }
 } 

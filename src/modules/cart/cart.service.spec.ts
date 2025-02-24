@@ -13,7 +13,8 @@ describe('CartService', () => {
   const mockCartModel = {
     findOne: jest.fn(),
     create: jest.fn(),
-    findOneAndUpdate: jest.fn(),
+    findOneAndUpdate: jest.fn().mockReturnThis(),
+    exec: jest.fn(),
   };
 
   const mockProductsService = {
@@ -38,6 +39,9 @@ describe('CartService', () => {
     service = module.get<CartService>(CartService);
     cartModel = module.get<Model<CartDocument>>(getModelToken(Cart.name));
     productsService = module.get<ProductsService>(ProductsService);
+
+    // Reset all mocks
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -89,22 +93,26 @@ describe('CartService', () => {
         userId: 'user123',
         items: [],
         totalAmount: 0,
-        save: jest.fn().mockResolvedValue({
-          userId: 'user123',
-          items: [
-            {
-              productId: 'product123',
-              quantity: 2,
-              price: 100,
-            },
-          ],
-          totalAmount: 200,
-        }),
+      };
+
+      const updatedCart = {
+        userId: 'user123',
+        items: [
+          {
+            productId: 'product123',
+            quantity: 2,
+            price: 100,
+          },
+        ],
+        totalAmount: 200,
       };
 
       mockProductsService.findOne.mockResolvedValue(mockProduct);
       mockCartModel.findOne.mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockCart),
+      });
+      mockCartModel.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(updatedCart),
       });
 
       const result = await service.addToCart('user123', {
@@ -112,8 +120,103 @@ describe('CartService', () => {
         quantity: 2,
       });
 
-      expect(result.totalAmount).toBe(200);
-      expect(result.items).toHaveLength(1);
+      expect(result).toEqual(updatedCart);
+    });
+  });
+
+  describe('updateCartItem', () => {
+    it('should update cart item quantity', async () => {
+      const mockCart = {
+        userId: 'user123',
+        items: [
+          {
+            productId: 'product123',
+            quantity: 1,
+            price: 100,
+          },
+        ],
+        totalAmount: 100,
+      };
+
+      const mockProduct = {
+        _id: 'product123',
+        price: 100,
+        stock: 10,
+      };
+
+      const updatedCart = {
+        ...mockCart,
+        items: [{ ...mockCart.items[0], quantity: 2 }],
+        totalAmount: 200,
+      };
+
+      mockCartModel.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockCart),
+      });
+      mockProductsService.findOne.mockResolvedValue(mockProduct);
+      mockCartModel.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(updatedCart),
+      });
+
+      const result = await service.updateCartItem('user123', 'product123', {
+        quantity: 2,
+      });
+
+      expect(result).toEqual(updatedCart);
+    });
+  });
+
+  describe('removeFromCart', () => {
+    it('should remove item from cart', async () => {
+      const mockCart = {
+        userId: 'user123',
+        items: [
+          {
+            productId: 'product123',
+            quantity: 1,
+            price: 100,
+          },
+        ],
+        totalAmount: 100,
+      };
+
+      const updatedCart = {
+        userId: 'user123',
+        items: [],
+        totalAmount: 0,
+      };
+
+      mockCartModel.findOne.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockCart),
+      });
+      mockCartModel.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(updatedCart),
+      });
+
+      const result = await service.removeFromCart('user123', 'product123');
+      expect(result).toEqual(updatedCart);
+    });
+  });
+
+  describe('clearCart', () => {
+    it('should clear cart', async () => {
+      const clearedCart = {
+        userId: 'user123',
+        items: [],
+        totalAmount: 0,
+      };
+
+      mockCartModel.findOneAndUpdate.mockReturnValue({
+        exec: jest.fn().mockResolvedValue(clearedCart),
+      });
+
+      await service.clearCart('user123');
+
+      expect(mockCartModel.findOneAndUpdate).toHaveBeenCalledWith(
+        { userId: 'user123' },
+        { $set: { items: [], totalAmount: 0 } },
+        { new: true },
+      );
     });
   });
 }); 
