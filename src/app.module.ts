@@ -8,6 +8,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { CartModule } from './modules/cart/cart.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { HepsiburadaModule } from './modules/marketplace/hepsiburada/hepsiburada.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     CartModule,
     PaymentModule,
     NotificationsModule,
+    HepsiburadaModule,
   ],
 })
 export class AppModule {} 

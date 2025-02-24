@@ -638,6 +638,106 @@ const { paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
                     </div>
                 </div>
             </section>
+
+            <section id="marketplace">
+                <h2>🏪 Marketplace</h2>
+                <div class="card">
+                    <h3>Hepsiburada Entegrasyonu</h3>
+                    <p>Hepsiburada marketplace entegrasyonu ile ürünlerinizi yönetin, siparişleri takip edin ve stok/fiyat güncellemelerini otomatize edin.</p>
+
+                    <h4>Ürün Yönetimi</h4>
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/marketplace/hepsiburada/products/:productId/sync</span>
+                        <span class="badge">Ürün senkronizasyonu</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "name": "Örnek Ürün",
+  "price": 199.99,
+  "stock": 100,
+  "description": "Ürün açıklaması",
+  "images": ["https://example.com/image1.jpg"],
+  "category": "Elektronik"
+}</code></pre>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/marketplace/hepsiburada/products/:productId/stock</span>
+                        <span class="badge">Stok güncelleme</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "stock": 75
+}</code></pre>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/marketplace/hepsiburada/products/:productId/price</span>
+                        <span class="badge">Fiyat güncelleme</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "price": 249.99
+}</code></pre>
+
+                    <h4>Sipariş Yönetimi</h4>
+                    <div class="endpoint">
+                        <span class="method get">GET</span>
+                        <span class="path">/marketplace/hepsiburada/orders</span>
+                        <span class="badge">Siparişleri listele</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Query Parameters
+?startDate=2024-01-01&endDate=2024-01-31</code></pre>
+
+                    <div class="endpoint">
+                        <span class="method post">POST</span>
+                        <span class="path">/marketplace/hepsiburada/orders/:orderId/status</span>
+                        <span class="badge">Sipariş durumu güncelle</span>
+                    </div>
+                    <pre><code class="language-javascript">// Örnek Request Body
+{
+  "status": "shipped"  // pending, processing, shipped, delivered, cancelled
+}</code></pre>
+
+                    <h4>Hata Kodları</h4>
+                    <table class="error-codes">
+                        <tr>
+                            <th>Kod</th>
+                            <th>Açıklama</th>
+                        </tr>
+                        <tr>
+                            <td>401</td>
+                            <td>Kimlik doğrulama hatası</td>
+                        </tr>
+                        <tr>
+                            <td>404</td>
+                            <td>Ürün veya sipariş bulunamadı</td>
+                        </tr>
+                        <tr>
+                            <td>409</td>
+                            <td>Senkronizasyon çakışması</td>
+                        </tr>
+                        <tr>
+                            <td>422</td>
+                            <td>Geçersiz veri formatı</td>
+                        </tr>
+                        <tr>
+                            <td>500</td>
+                            <td>Hepsiburada API hatası</td>
+                        </tr>
+                    </table>
+
+                    <h4>Webhook Events</h4>
+                    <p>Hepsiburada'dan gelen gerçek zamanlı bildirimleri dinlemek için webhook'ları kullanın:</p>
+                    <ul>
+                        <li>🛍️ <code>order.created</code>: Yeni sipariş oluşturulduğunda</li>
+                        <li>📦 <code>order.status_updated</code>: Sipariş durumu değiştiğinde</li>
+                        <li>💰 <code>order.payment_completed</code>: Ödeme tamamlandığında</li>
+                        <li>⚠️ <code>product.stock_alert</code>: Stok kritik seviyeye düştüğünde</li>
+                    </ul>
+                </div>
+            </section>
         </main>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
